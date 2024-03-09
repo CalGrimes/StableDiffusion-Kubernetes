@@ -1,7 +1,7 @@
 
 # Stable Diffusion Kubernetes Service
 
-Under construction.
+🚧 Under construction 🚧
 ---
 
 Model details can be found on HuggingFace [here](https://huggingface.co/runwayml/stable-diffusion-v1-5).
