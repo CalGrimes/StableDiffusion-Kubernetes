@@ -1,13 +1,30 @@
+from fastapi import FastAPI, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from model.stable_diffusion import StableDiffusion
+import time
 
-def main():
-    # prompt input
-    prompt = input("Enter a prompt: ")
+app = FastAPI()
 
-    # call the model
-    stable_diffusion = StableDiffusion()
-    stable_diffusion() if prompt == '' else stable_diffusion(prompt)
+origins = [
+    "http://localhost/3000",
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-if __name__ == "__main__":
-    main()
+@app.post("/predict")
+async def predict(prompt: str):
+    def generate():
+        stable_diffusion = StableDiffusion()
+        for i in range(100):
+            # Simulate a long-running task
+            time.sleep(0.1)
+            stable_diffusion(prompt) if prompt != '' else stable_diffusion()
+            yield f"data: {i+1}\n\n"  # Send progress to the client
+
+    return StreamingResponse(generate(), media_type="text/event-stream")
