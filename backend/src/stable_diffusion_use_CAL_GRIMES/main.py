@@ -17,7 +17,10 @@ app.add_middleware(
 )
 
 @app.post("/predict")
-async def predict(prompt: str):
+async def predict(prompt: str) -> dict:
     stable_diffusion = StableDiffusion()
-    stable_diffusion(prompt) if prompt != '' else stable_diffusion()
-    return {"message": "Prediction made successfully!"}
+    image = stable_diffusion(prompt) if prompt != '' else stable_diffusion()
+    return {"image": image}
+
+
+

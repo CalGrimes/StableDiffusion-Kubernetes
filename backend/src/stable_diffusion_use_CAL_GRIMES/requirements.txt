@@ -1,0 +1,6 @@
+diffusers==0.27.0
+uvicorn==0.20.0
+torch==2.2.1
+setuptools==68.2.2
+redis==3.5.3
+fastapi==0.103.0
