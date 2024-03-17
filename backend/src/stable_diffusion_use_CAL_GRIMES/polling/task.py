@@ -14,8 +14,10 @@ class Task:
         return cls._redis
 
     def __call__(self, task_id: str, status: str, percent_complete: int):
-        self.get_redis().hset(task_id, 'status', status)
-        self.get_redis().hset(task_id, 'percent_complete', percent_complete)
+        redis_instance = self.get_redis()
+        redis_instance.hset(task_id, 'status', status)
+        redis_instance.hset(task_id, 'percent_complete', percent_complete)
+        redis_instance.expire(task_id, 1800)  # Set TTL to 30 minutes
 
     def create_task(self, prompt):
         # Create a new task with status 'pending'
