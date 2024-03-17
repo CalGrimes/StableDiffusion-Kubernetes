@@ -1,25 +1,38 @@
 import logo from './logo.svg';
-import './App.css';
+import DarkNavPage from './components/dark_nav_with_overlap';
+// Filename - App.js
+
+import React from "react";
+import {
+	BrowserRouter as Router,
+	Routes,
+	Route,
+} from "react-router-dom";
+import Home from "./pages/Home.jsx";
+import Demo from "./pages/Demo.jsx";
+// import About from "./pages/about";
+// import Blogs from "./pages/blogs";
+// import SignUp from "./pages/signup";
+// import Contact from "./pages/contact";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	return (
+		<Router>
+			<Routes>
+				<Route exact path="/" element={<Home />} />
+				<Route path="/demo" element={<Demo />} />
+				{/* <Route
+					path="/contact"
+					element={<Contact />}
+				/>
+				<Route path="/blogs" element={<Blogs />} />
+				<Route
+					path="/sign-up"
+					element={<SignUp />}
+				/> */}
+			</Routes>
+		</Router>
+	);
 }
 
 export default App;

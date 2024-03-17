@@ -1,28 +1,38 @@
+import json
 import redis
 
 class Task:
-    def __init__(self, task_id, status='pending', result=None):
-        self.task_id = task_id
+    def __init__(self, task_id, status='pending', result=None) -> None:
+        self.task_id = task_id.replace(" ", "_")
         self.percent_complete = 0
         self.status = status
         self.result = result
 
     @classmethod
-    def get_redis(cls):
-        if not hasattr(cls, "_redis"):
-            cls._redis = redis.Redis(host='localhost', port=6379, db=0)  # Connect to Redis instance
+    def get_redis(cls) -> redis.client:
+        try:
+            cls._redis = redis.Redis(host='localhost', port=6379, db=0)  # Try to connect to Redis instance
+        except redis.ConnectionError:
+            print("Could not connect to Redis. Skipping Redis operations.")
+            cls._redis = None  # Set to None if connection fails
         return cls._redis
+    
+    @classmethod
+    def set_redis_task(cls) -> None:
+        redis_instance = cls.get_redis()
+        if redis_instance is not None:  # Only perform Redis operations if connection was successful
+            # set class as json
+            task = cls.__dict__
+            task = json.dumps(task)
+            redis_instance.set(cls.task_id, task)
+            redis_instance.expire(cls.task_id, 1800)
+            
+    @staticmethod
+    def set_task(self, task_id: str, status: str, percent_complete: int, result=None) -> None:
+        self.task_id = task_id.replace(" ", "_")
+        self.percent_complete = percent_complete
+        self.status = status
+        self.result = result
+        self.set_redis_task()
 
-    def __call__(self, task_id: str, status: str, percent_complete: int):
-        redis_instance = self.get_redis()
-        redis_instance.hset(task_id, 'status', status)
-        redis_instance.hset(task_id, 'percent_complete', percent_complete)
-        redis_instance.expire(task_id, 1800)  # Set TTL to 30 minutes
-
-    def create_task(self, prompt):
-        # Create a new task with status 'pending'
-        task_id = prompt.replace(" ", "_")
-        new_task = Task(task_id=task_id, status='in_progress')
-        new_task(task_id, 'pending', 0)
-        self.tasks[new_task.task_id] = new_task
-        return task_id
+    
