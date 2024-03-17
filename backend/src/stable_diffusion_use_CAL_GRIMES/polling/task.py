@@ -17,5 +17,10 @@ class Task:
         self.get_redis().hset(task_id, 'status', status)
         self.get_redis().hset(task_id, 'percent_complete', percent_complete)
 
-    def update_task_status(self, task_id: str, new_status: str):
-        self.get_redis().hset(task_id, 'status', new_status)
+    def create_task(self, prompt):
+        # Create a new task with status 'pending'
+        task_id = prompt.replace(" ", "_")
+        new_task = Task(task_id=task_id, status='in_progress')
+        new_task(task_id, 'pending', 0)
+        self.tasks[new_task.task_id] = new_task
+        return task_id

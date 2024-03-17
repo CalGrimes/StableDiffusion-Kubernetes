@@ -18,17 +18,12 @@ class StableDiffusion:
                 callback_kwargs["prompt_embeds"] = prompt_embeds
 
         # update task status and percentage
-        new_task = self.tasks[task_id]
-        new_task.update_task_status(task_id, 'in_progress')
-        new_task.percent_complete = int((step_index / pipe.num_timesteps) * 100)
+        task = self.tasks[task_id]
+        task(task_id, 'in_progress', int((step_index / pipe.num_timesteps) * 100))
 
-        new_task(task_id, 'in_progress', new_task.percent_complete)
         return callback_kwargs
 
     def predict(self, prompt="a photo of an astronaut riding a horse on mars", task_id=""):
-        new_task = self.tasks[task_id]
-
-
         pipe = StableDiffusionPipeline.from_pretrained(self.model_id, torch_dtype=torch.float32)
         pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
         pipe = pipe.to("cuda")
@@ -42,16 +37,14 @@ class StableDiffusion:
         )
         # Update the task status to 'completed' after the image is saved
         Task(task_id=task_id, status='in_progress', percent_complete=100)
+
         out.images[0].save(prompt.replace(" ", "_") + ".png")
 
     def __call__(self, prompt="a photo of an astronaut riding a horse on mars"):
         prompt = prompt.replace("%20", " ")
 
         # Create a new task with status 'pending'
-        task_id = prompt.replace(" ", "_")
-        new_task = Task(task_id=task_id, status='in_progress')
-        new_task(task_id, 'pending', 0)
-        self.tasks[new_task.task_id] = new_task
+        task_id = Task.create_task(prompt)
 
         # Call the predict method with the prompt and task_id
         self.predict(prompt, task_id)
